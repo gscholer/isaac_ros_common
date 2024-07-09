@@ -14,7 +14,7 @@ RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidi
 
 # disable terminal interaction for apt
 ENV DEBIAN_FRONTEND=noninteractive
-ENV SHELL /bin/bash
+ENV SHELL=/bin/bash
 SHELL ["/bin/bash", "-c"]
 
 # Env setup
@@ -24,6 +24,7 @@ ENV ROS_PYTHON_VERSION=3
 ENV ROS_DISTRO=humble
 ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ENV ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml
 
 # Avoid setup.py and easy_install deprecation warnings caused by colcon and setuptools
 # https://github.com/colcon/colcon-core/issues/454
@@ -149,7 +150,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 # Revert breaking QoS changes in https://github.com/ros-perception/image_pipeline/pull/814
 RUN --mount=type=cache,target=/var/cache/apt \
     mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
-    && git clone https://github.com/ros-perception/image_pipeline.git && cd image_pipeline && git checkout 55bf2a38c327b829c3da444f963a6c66bfe0598f \
+    && git clone https://gitee.com/ros_perception/image_pipeline.git && cd image_pipeline && git checkout 55bf2a38c327b829c3da444f963a6c66bfe0598f \
     && git config user.email "builder@nvidia.com" && git config user.name "NVIDIA Builder" \
     && git remote add fork https://github.com/schornakj/image_pipeline.git && git fetch fork && git cherry-pick 969d6c763df99b42844742946f7a70c605a72a15 \
     && source ${ROS_ROOT}/setup.bash \
@@ -165,7 +166,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
     && export RCLCPP_VERSION="release/humble/rclcpp/$(apt-cache madison ros-humble-rclcpp | grep -m1 -oP 'ros-humble-rclcpp \| \K[^j]+(?=jammy)')" \
     && echo ${RCLCPP_VERSION} \
-    && git clone https://github.com/ros2-gbp/rclcpp-release.git && cd rclcpp-release && git checkout ${RCLCPP_VERSION} \
+    && git clone https://gitee.com/ros2-gbp/rclcpp-release.git && cd rclcpp-release && git checkout ${RCLCPP_VERSION} \
     && patch -i /tmp/rclcpp-disable-tests.patch \
     && unset RCLCPP_VERSION \
     && git config user.email "builder@nvidia.com" && git config user.name "NVIDIA Builder" \
@@ -221,7 +222,7 @@ apt-get update && apt-get install -y \
 # Install various moveit_resources packages from source.
 RUN --mount=type=cache,target=/var/cache/apt \
     mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
-    && git clone https://github.com/ros-planning/moveit_resources.git -b humble \
+    && git clone https://gitee.com/ros_planning/moveit_resources.git -b humble \
     && cd moveit_resources && source ${ROS_ROOT}/setup.bash \
     && cd fanuc_description && bloom-generate rosdebian && fakeroot debian/rules binary \
     && cd .. && apt-get install -y ./*.deb && rm *.deb \
@@ -240,7 +241,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 # installed from source above.
 RUN --mount=type=cache,target=/var/cache/apt \
     mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
-    && git clone https://github.com/ros-planning/moveit_task_constructor.git -b humble \
+    && git clone https://gitee.com/ros_planning/moveit_task_constructor.git -b humble \
     && cd moveit_task_constructor && source ${ROS_ROOT}/setup.bash \
     && cd msgs && bloom-generate rosdebian && fakeroot debian/rules binary \
     && cd ../ && apt-get install -y ./*.deb && rm ./*.deb \
@@ -263,7 +264,7 @@ apt-get update && apt-get install -y \
 # Install moveit2_tutorials from source (depends on moveit_hybrid_planning).
 RUN --mount=type=cache,target=/var/cache/apt \
     mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
-    && git clone https://github.com/ros-planning/moveit2_tutorials.git -b humble \
+    && git clone https://gitee.com/ros_planning/moveit2_tutorials.git -b humble \
     && cd moveit2_tutorials && source ${ROS_ROOT}/setup.bash \
     && bloom-generate rosdebian && fakeroot debian/rules binary \
     && cd ../ && apt-get install -y ./*.deb && rm ./*.deb
